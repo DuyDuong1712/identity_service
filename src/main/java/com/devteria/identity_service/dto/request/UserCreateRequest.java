@@ -1,17 +1,32 @@
 package com.devteria.identity_service.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
+
 public class UserCreateRequest {
+
+    @NotBlank(message = "USER_NAME_INVALID")
+    @Size(min = 5, max = 40, message = "USER_NAME_INVALID")
     private String username;
+
+    @NotBlank(message = "PASSWORD_INVALID")
+    @Size(min = 8, max = 40, message = "PASSWORD_INVALID")
     private String password;
+
+    @Email(message = "EMAIL_INVALID")
     private String email;
+
     @JsonProperty("firstname")
     private String firstName;
+
     @JsonProperty("lastname")
     private String lastName;
+
     @JsonProperty("dayofbirth")
     private LocalDate dayOfBirth;
 

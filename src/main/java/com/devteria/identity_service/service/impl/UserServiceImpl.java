@@ -3,6 +3,10 @@ package com.devteria.identity_service.service.impl;
 import com.devteria.identity_service.dto.request.UserCreateRequest;
 import com.devteria.identity_service.dto.request.UserUpdateRequest;
 import com.devteria.identity_service.entity.UserEntity;
+import com.devteria.identity_service.exception.ApplicationException;
+import com.devteria.identity_service.enums.ErrorCode;
+import com.devteria.identity_service.exception.ResourceConflictException;
+import com.devteria.identity_service.exception.ResourceNotFoundException;
 import com.devteria.identity_service.repository.UserRepository;
 import com.devteria.identity_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +22,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity createUser(UserCreateRequest request) {
         UserEntity userEntity = new UserEntity();
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ResourceConflictException(ErrorCode.USER_EXISTS);
+        }
+
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new ResourceConflictException(ErrorCode.USER_NAME_IN_USE);
+        }
+
 
         userEntity.setUsername(request.getUsername());
         userEntity.setPassword(request.getPassword());
@@ -36,7 +49,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity getUserById(String userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
     @Override
