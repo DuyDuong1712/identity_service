@@ -14,6 +14,8 @@ import com.devteria.identity_service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,7 +33,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse createUser(UserCreateRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ResourceConflictException(ErrorCode.USER_EXISTS);
+            throw new ResourceConflictException(ErrorCode.EMAIL_EXISTS);
         }
 
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -39,15 +41,15 @@ public class UserServiceImpl implements UserService {
         }
 
         UserEntity userEntity = userMapper.toEntity(request);
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
+
         userRepository.save(userEntity);
         return userMapper.toDTO(userEntity);
     }
 
     @Override
     public List<UserResponse> getAllUsers() {
-//        List<UserEntity> users = userRepository.findAll();
-//        List<UserResponse> result = users.stream().map(u -> userMapper.toDTO(u)).collect(Collectors.toList());
-
         List<UserResponse> result = userMapper.toDTOs(userRepository.findAll());
         return result;
     }

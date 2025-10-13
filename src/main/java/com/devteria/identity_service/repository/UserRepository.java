@@ -5,6 +5,8 @@ import com.devteria.identity_service.enums.ErrorCode;
 import com.devteria.identity_service.exception.ResourceNotFoundException;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface UserRepository extends JpaRepository<UserEntity,String> {
     default UserEntity findByIdOrThrow(String userId) {
         return findById(userId)
@@ -13,4 +15,6 @@ public interface UserRepository extends JpaRepository<UserEntity,String> {
 
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
+
+    Optional<UserEntity> findByUsername(String username);
 }
