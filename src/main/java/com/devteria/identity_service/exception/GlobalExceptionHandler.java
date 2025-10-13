@@ -78,8 +78,7 @@ public class GlobalExceptionHandler {
             }
         }
 
-        ApiResponse<Object> response = ApiResponse.error(ErrorCode.INVALID_INPUT);
-        response.setErrorDetails(errors);
+        ApiResponse<Object> response = ApiResponse.validationError(ErrorCode.INVALID_INPUT, errors);
 
         return ResponseEntity.badRequest().body(response);
     }

@@ -2,26 +2,33 @@ package com.devteria.identity_service.service.impl;
 
 import com.devteria.identity_service.dto.request.UserCreateRequest;
 import com.devteria.identity_service.dto.request.UserUpdateRequest;
+import com.devteria.identity_service.dto.response.UserResponse;
 import com.devteria.identity_service.entity.UserEntity;
 import com.devteria.identity_service.exception.ApplicationException;
 import com.devteria.identity_service.enums.ErrorCode;
 import com.devteria.identity_service.exception.ResourceConflictException;
 import com.devteria.identity_service.exception.ResourceNotFoundException;
+import com.devteria.identity_service.mapper.UserMapper;
 import com.devteria.identity_service.repository.UserRepository;
 import com.devteria.identity_service.service.UserService;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class UserServiceImpl implements UserService {
-    @Autowired
-    private UserRepository userRepository;
+    UserRepository userRepository;
+
+    UserMapper userMapper;
 
     @Override
-    public UserEntity createUser(UserCreateRequest request) {
-        UserEntity userEntity = new UserEntity();
+    public UserResponse createUser(UserCreateRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ResourceConflictException(ErrorCode.USER_EXISTS);
@@ -31,43 +38,37 @@ public class UserServiceImpl implements UserService {
             throw new ResourceConflictException(ErrorCode.USER_NAME_IN_USE);
         }
 
-
-        userEntity.setUsername(request.getUsername());
-        userEntity.setPassword(request.getPassword());
-        userEntity.setEmail(request.getEmail());
-        userEntity.setFirstName(request.getFirstName());
-        userEntity.setLastName(request.getLastName());
-        userEntity.setDayOfBirth(request.getDayOfBirth());
-
-        return userRepository.save(userEntity);
+        UserEntity userEntity = userMapper.toEntity(request);
+        userRepository.save(userEntity);
+        return userMapper.toDTO(userEntity);
     }
 
     @Override
-    public List<UserEntity> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> getAllUsers() {
+//        List<UserEntity> users = userRepository.findAll();
+//        List<UserResponse> result = users.stream().map(u -> userMapper.toDTO(u)).collect(Collectors.toList());
+
+        List<UserResponse> result = userMapper.toDTOs(userRepository.findAll());
+        return result;
     }
 
     @Override
-    public UserEntity getUserById(String userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
+    public UserResponse getUserById(String userId) {
+        UserEntity userEntity = userRepository.findByIdOrThrow(userId);
+        return userMapper.toDTO(userEntity);
     }
 
     @Override
-    public UserEntity updateUser(String userId, UserUpdateRequest request) {
-        UserEntity userEntity = getUserById(userId);
+    public UserResponse updateUser(String userId, UserUpdateRequest request) {
+        UserEntity userEntity = userRepository.findByIdOrThrow(userId);
+        userMapper.updateEntity(userEntity, request);
 
-        userEntity.setPassword(request.getPassword());
-        userEntity.setEmail(request.getEmail());
-        userEntity.setFirstName(request.getFirstName());
-        userEntity.setLastName(request.getLastName());
-        userEntity.setDayOfBirth(request.getDayOfBirth());
-
-        return userRepository.save(userEntity);
+        return userMapper.toDTO(userEntity);
     }
 
     @Override
     public void deleteUser(String userId) {
-        UserEntity userEntity = getUserById(userId);
+        UserEntity userEntity = userRepository.findByIdOrThrow(userId);
         userRepository.delete(userEntity);
     }
 }

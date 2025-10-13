@@ -1,78 +1,34 @@
 package com.devteria.identity_service.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
+@Table(name = "users")
 public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String  id;
-    private String username;
-    private String password;
-    private String email;
-    private String firstName;
-    private String lastName;
-    private LocalDate dayOfBirth;
+    String id;
 
-    public String getId() {
-        return id;
-    }
+    String username;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    String password;
 
-    public String getUsername() {
-        return username;
-    }
+    String email;
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    String firstName;
 
-    public String getPassword() {
-        return password;
-    }
+    String lastName;
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    LocalDate dayOfBirth;
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public LocalDate getDayOfBirth() {
-        return dayOfBirth;
-    }
-
-    public void setDayOfBirth(LocalDate dayOfBirth) {
-        this.dayOfBirth = dayOfBirth;
-    }
 }

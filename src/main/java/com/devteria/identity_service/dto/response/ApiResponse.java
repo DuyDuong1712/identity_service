@@ -4,17 +4,24 @@ import com.devteria.identity_service.enums.ErrorCode;
 import com.devteria.identity_service.enums.SuccessCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
 import java.util.Map;
 
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
-    private int code = 1000;
-    private String message;
-    private T result;
-    private String timestamp;
-    private Map<String, String> errorDetails; //Chi tiết lỗi (đặc biệt validation)
+    int code = 1000;
+    String message;
+    T result;
+    String timestamp;
+    Map<String, String> errorDetails; //Chi tiết lỗi (đặc biệt validation)
 
     public ApiResponse() {
         this.timestamp = Instant.now().toString();
@@ -42,45 +49,5 @@ public class ApiResponse<T> {
         response.setMessage(errorCode.getMessage());
         response.setErrorDetails(errorDetails);
         return response;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public T getResult() {
-        return result;
-    }
-
-    public void setResult(T result) {
-        this.result = result;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public Map<String, String> getErrorDetails() {
-        return errorDetails;
-    }
-
-    public void setErrorDetails(Map<String, String> errorDetails) {
-        this.errorDetails = errorDetails;
     }
 }
