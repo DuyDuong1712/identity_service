@@ -19,6 +19,9 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
 
+jwt:
+  signer-key: 4a048d71cc83c8d606a3daab7143da1e4352da045df7e70abe100c66ae6fd319
+
 springdoc:
   api-docs:
     path: /identity/api-docs
