@@ -30,5 +30,4 @@ public class UserEntity {
     String lastName;
 
     LocalDate dayOfBirth;
-
 }

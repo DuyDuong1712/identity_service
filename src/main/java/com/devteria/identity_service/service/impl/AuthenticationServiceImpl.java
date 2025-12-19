@@ -89,13 +89,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public IntrospectResponse introspect(IntrospectRequest introspectRequest) throws JOSEException, ParseException {
         String token = introspectRequest.getToken();
 
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-
         SignedJWT signedJWT = SignedJWT.parse(token);
+
+        // Verify chữ ký
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        boolean result =  signedJWT.verify(verifier);
 
         Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
-        boolean result =  signedJWT.verify(verifier);
         return IntrospectResponse.builder()
                 .valid(result && expirationTime.after(new Date()))
                 .build();
