@@ -13,6 +13,11 @@ public interface UserRepository extends JpaRepository<UserEntity,String> {
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
+    default UserEntity findByUsernameOrThrow(String username) {
+        return findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND));
+    }
+
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
 

@@ -15,6 +15,10 @@ import com.devteria.identity_service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -56,13 +60,16 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDTO(userEntity);
     }
 
+
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getAllUsers() {
         List<UserResponse> result = userMapper.toDTOs(userRepository.findAll());
         return result;
     }
 
     @Override
+    @PostAuthorize("hasRole('ADMIN') or returnObject.username == authentication.principal.username")
     public UserResponse getUserById(String userId) {
         UserEntity userEntity = userRepository.findByIdOrThrow(userId);
         return userMapper.toDTO(userEntity);
@@ -76,9 +83,21 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDTO(userEntity);
     }
 
+
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(String userId) {
         UserEntity userEntity = userRepository.findByIdOrThrow(userId);
         userRepository.delete(userEntity);
+    }
+
+    @Override
+    public UserResponse getMyInfo() {
+        SecurityContext context = SecurityContextHolder.getContext();
+
+        String username = context.getAuthentication().getName();
+        UserEntity userEntity = userRepository.findByUsernameOrThrow(username);
+
+        return userMapper.toDTO(userEntity);
     }
 }

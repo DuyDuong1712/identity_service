@@ -31,10 +31,6 @@ public class UserController {
 
     @GetMapping
     public List<UserResponse> getAllUsers() {
-        var authen = SecurityContextHolder.getContext().getAuthentication();
-        log.info("authen: {}", authen);
-        log.info("Username: {}", authen.getName());
-        authen.getAuthorities().forEach(authority -> log.info(authority.getAuthority()));
         return userService.getAllUsers();
     }
 
@@ -51,5 +47,14 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
+    }
+
+    @GetMapping("/my-info")
+    public ApiResponse<UserResponse>  getMyInfo() {
+        return ApiResponse.<UserResponse>builder()
+                .code(SuccessCode.SUCCESS.getCode())
+                .message(SuccessCode.SUCCESS.getMessage())
+                .result(userService.getMyInfo())
+                .build();
     }
 }
