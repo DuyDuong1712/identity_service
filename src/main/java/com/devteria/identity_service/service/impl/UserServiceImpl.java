@@ -4,6 +4,7 @@ import com.devteria.identity_service.dto.request.UserCreateRequest;
 import com.devteria.identity_service.dto.request.UserUpdateRequest;
 import com.devteria.identity_service.dto.response.UserResponse;
 import com.devteria.identity_service.entity.UserEntity;
+import com.devteria.identity_service.enums.Role;
 import com.devteria.identity_service.exception.ApplicationException;
 import com.devteria.identity_service.enums.ErrorCode;
 import com.devteria.identity_service.exception.ResourceConflictException;
@@ -18,7 +19,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +31,8 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     UserMapper userMapper;
+
+    PasswordEncoder passwordEncoder;
 
     @Override
     public UserResponse createUser(UserCreateRequest request) {
@@ -41,8 +46,11 @@ public class UserServiceImpl implements UserService {
         }
 
         UserEntity userEntity = userMapper.toEntity(request);
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        Set<String> roles = new HashSet<>();
+        roles.add(Role.USER.name());
+        userEntity.setRoles(roles);
 
         userRepository.save(userEntity);
         return userMapper.toDTO(userEntity);

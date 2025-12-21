@@ -23,11 +23,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.StringJoiner;
 
 @Slf4j
 @Service
@@ -53,24 +55,24 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new ApplicationException(ErrorCode.UNAUTHENTICATED);
         }
         return AuthenticationResponse.builder()
-                .token(generateToken(authenticationRequest.getUsername()))
+                .token(generateToken(user))
                 .isAuthenticated(authenticated)
                 .build();
     }
 
     @Override
-    public String generateToken(String username) {
+    public String generateToken(UserEntity user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .subject(username)
+                .subject(user.getUsername())
                 .issuer("identity-service") // Ai phát hành token
                 .issueTime(new Date()) // Thời điểm phát hành
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
                 )) // Thời điểm token hết hạn (epoch seconds)
                 .notBeforeTime(new Date()) // Thời điểm token có hiệu lực
-                .claim("customeClaim", "customValue")
+                .claim("scope",  buildScopeClaim(user))
                 .build();
         Payload payload = new Payload(claims.toJSONObject());
 
@@ -80,7 +82,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
             return jwsObject.serialize();
         } catch (Exception e) {
-            log.error("Can not generate token for username: {}", username, e);
+            log.error("Can not generate token for username: {}", user.getUsername(), e);
             throw new RuntimeException(e);
         }
     }
@@ -100,5 +102,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return IntrospectResponse.builder()
                 .valid(result && expirationTime.after(new Date()))
                 .build();
+    }
+
+    private String buildScopeClaim(UserEntity user) {
+        StringJoiner stringJoiner = new StringJoiner(" ");
+        if (!CollectionUtils.isEmpty(user.getRoles())) {
+             user.getRoles().forEach(role -> stringJoiner.add(role.toUpperCase()));
+        }
+        return stringJoiner.toString();
     }
 }

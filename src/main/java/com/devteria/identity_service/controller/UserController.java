@@ -9,10 +9,13 @@ import com.devteria.identity_service.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -28,6 +31,10 @@ public class UserController {
 
     @GetMapping
     public List<UserResponse> getAllUsers() {
+        var authen = SecurityContextHolder.getContext().getAuthentication();
+        log.info("authen: {}", authen);
+        log.info("Username: {}", authen.getName());
+        authen.getAuthorities().forEach(authority -> log.info(authority.getAuthority()));
         return userService.getAllUsers();
     }
 
